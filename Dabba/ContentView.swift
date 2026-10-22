@@ -34,7 +34,12 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Sessions")
         }
-        .sheet(isPresented: $showingSessions) { SessionsView() }
+        // SPIKE: the corner button opens the board instead of the sessions list.
+        #if os(iOS)
+        .fullScreenCover(isPresented: $showingSessions) { BoardView() }
+        #else
+        .sheet(isPresented: $showingSessions) { BoardView() }
+        #endif
         .tint(Paper.accent) // cursor and focus color
         .onAppear(perform: ensureDraft)
         .onChange(of: drafts.isEmpty) { _, isEmpty in
