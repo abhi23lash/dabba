@@ -49,20 +49,20 @@ Deliberate decision: **Finish is disabled until the landing line has text.** Eve
 
 ## Design system
 
-Feel: warm, plain, unhurried, like good paper. Never pure white or pure black.
+Feel: mechanical and methodical; the page is an instrument for thinking by writing. Plain white and neutral greys, no warmth, no brand color (user call, 2026-10-22: the earlier cream, terracotta and serif look read too close to Claude). The visual identity is still being worked out.
 
-| Token | Light ("Paper") | Dark ("Night") | Use |
+| Token | Light | Dark | Use |
 | --- | --- | --- | --- |
-| paper | #F6F2EA | #171614 | Page and board ground |
-| paperRaised | #FFFDF8 | #211F1C | Sheets above the page |
-| ink | #22201C | #EDE8DF | Writing, primary text |
-| inkMuted | #6B655B | #A39D92 | Labels, hints, dates |
-| hairline | #DDD6C9 | #34312C | Rules and dividers |
-| accent | #B5502F | #E8896A | Cursor, focus ring, strike-through only; one accent mark on screen at a time |
+| paper | #FFFFFF | #141414 | Page and board ground |
+| paperRaised | #FFFFFF | #1E1E1E | Sheets above the page |
+| ink | #1A1A1A | #EDEDED | Writing, primary text |
+| inkMuted | #6E6E6E | #9A9A9A | Labels, hints, dates |
+| hairline | #E5E5E5 | #2E2E2E | Rules and dividers |
+| accent | #1A1A1A | #EDEDED | Cursor, focus; plain ink for now, a functional signal color may come later |
 
 All text pairs pass WCAG AA in both themes (checked).
 
-- **Type:** New York (`.system(design: .serif)`) for everything written; SF Pro for interface. Page 19pt/30 line, question 24pt italic, landing 22pt semibold, labels 13pt medium. Writing column about 65 characters (640pt).
+- **Type:** SF Pro throughout (user call, 2026-10-22: easy on the eyes, not the focus; the serif read too close to Claude). Page 18pt with 8pt line spacing, question 22pt medium, landing 20pt semibold, labels 13pt medium. Writing column about 65 characters (640pt).
 - **Depth:** flat. No shadows except the system drag lift.
 - **Motion:** slow and physical, never bouncy. Respect Reduce Motion (cross-fade instead).
 - **Icons:** SF Symbols, minimal; nothing on screen while typing.
@@ -103,8 +103,7 @@ The user should use each step daily for a few days before the next.
 
 ## Known gaps in the starter
 
-- TextEditor placeholder inset is approximated and may misalign by a few points per platform.
-- Spell-check squiggles are still on (the intent is none). SwiftUI has no direct API; may need a `UITextView`/`NSTextView` wrapper later.
+- Strike instead of delete (2026-10-22): the writing area is a native `UITextView`/`NSTextView` (`Page/PageTextView.swift`). Deleting or typing over a selection strikes it through and fades it; single-character backspace deletes normally. Struck ranges are saved on `Session.struck`. A strike resets the text view's undo history (one undo step back to before the strike). Spell-check is off.
 - Fixed font sizes ignore Dynamic Type; revisit before release.
 - Return in the question field moves focus to the writing area on submit; check behaviour on iOS with a vertical-axis `TextField`.
 

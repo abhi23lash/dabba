@@ -15,7 +15,7 @@ struct SessionsView: View {
                 NavigationLink(value: session) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(session.landing)
-                            .font(.system(size: 17, weight: .semibold, design: .serif))
+                            .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(Paper.ink)
                             .lineLimit(2)
                         Text(session.createdAt, format: .dateTime.weekday().day().month())
@@ -53,6 +53,26 @@ struct SessionsView: View {
 struct SessionReadView: View {
     let session: Session
 
+    /// The writing with its struck-through parts kept visible.
+    private var page: AttributedString {
+        let text = session.text as NSString
+        var result = AttributedString()
+        var cursor = 0
+        for range in Strike.ranges(from: session.struck, length: text.length) {
+            if range.location > cursor {
+                result += AttributedString(text.substring(with: NSRange(location: cursor,
+                                                                        length: range.location - cursor)))
+            }
+            var struck = AttributedString(text.substring(with: range))
+            struck.strikethroughStyle = .single
+            struck.foregroundColor = Paper.inkMuted
+            result += struck
+            cursor = NSMaxRange(range)
+        }
+        if cursor < text.length { result += AttributedString(text.substring(from: cursor)) }
+        return result
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -64,7 +84,7 @@ struct SessionReadView: View {
                         .font(Paper.question)
                         .foregroundStyle(Paper.ink)
                 }
-                Text(session.text)
+                Text(page)
                     .font(Paper.page)
                     .foregroundStyle(Paper.ink)
                     .lineSpacing(8)

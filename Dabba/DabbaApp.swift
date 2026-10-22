@@ -9,7 +9,15 @@ struct DabbaApp: App {
         }
         .modelContainer(for: Session.self)
         #if os(macOS)
-        .defaultSize(width: 760, height: 860)
+        .defaultSize(width: 1100, height: 860)
+        .commands {
+            CommandMenu("Page") {
+                Button("Branch Tangent") {
+                    NotificationCenter.default.post(name: .branchTangent, object: nil)
+                }
+                .keyboardShortcut("]", modifiers: .command)
+            }
+        }
         #endif
     }
 }
