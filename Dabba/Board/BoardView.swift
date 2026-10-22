@@ -43,8 +43,8 @@ struct BoardView: View {
             if let id = dragging, let block = blocks.first(where: { $0.id == id }) {
                 let target = target(for: block)
                 if isFree(target, ignoring: id) {
-                    RoundedRectangle(cornerRadius: Board.radius)
-                        .strokeBorder(Paper.inkMuted, style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                    BlockOutline(block: target)
+                        .stroke(Paper.inkMuted, style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
                         .frame(width: target.pixelWidth, height: target.pixelHeight)
                         .offset(x: target.x, y: target.y)
                 }
@@ -154,6 +154,8 @@ struct BoardBlock: Identifiable {
     let color: Color
     let marks: [BlockMark]
     let line: String
+    /// A few blocks are pebbles: a soft stone drawn inside the same footprint.
+    var pebbleSeed: Int? = nil
 
     var x: CGFloat { CGFloat(col) * Board.pitch }
     var y: CGFloat { CGFloat(row) * Board.pitch }
@@ -183,12 +185,15 @@ struct BoardBlock: Identifiable {
                      "I'm choosing the smaller flat.", "Ship it Friday.",
                      "What I actually feel is tired, not stuck."]
 
+        let pebbles: Set<Int> = [1, 6, 11]   // only a few
+
         var placed: [BoardBlock] = []
         for (i, size) in sizes.enumerated() {
             var block = BoardBlock(col: 0, row: 0, w: size.0, h: size.1,
                                    color: palette[i % palette.count],
                                    marks: markSets[i % markSets.count],
-                                   line: lines[i % lines.count])
+                                   line: lines[i % lines.count],
+                                   pebbleSeed: pebbles.contains(i) ? i : nil)
             search: for row in 0..<100 {
                 for col in 0...(columns - block.w) {
                     block.col = col
@@ -208,6 +213,36 @@ struct BlockView: View {
     private static let markInk = Color(light: 0x22201C, dark: 0x22201C)
 
     var body: some View {
+        if block.pebbleSeed != nil {
+            pebble
+        } else {
+            rectangle
+        }
+    }
+
+    /// Pebbles keep their marks together in the middle, inside the stone.
+    private var pebble: some View {
+        BlockOutline(block: block)
+            .fill(block.color)
+            .overlay {
+                HStack(spacing: 4) {
+                    if block.marks.contains(.dot) {
+                        Circle().fill(Self.markInk).frame(width: 5, height: 5)
+                    }
+                    if block.marks.contains(.bar) {
+                        Capsule().fill(Self.markInk).frame(width: 12, height: 3)
+                    }
+                    if block.marks.contains(.ring) {
+                        Circle().strokeBorder(Self.markInk, lineWidth: 1.5).frame(width: 9, height: 9)
+                    }
+                }
+            }
+            .contentShape(BlockOutline(block: block))
+            .accessibilityElement()
+            .accessibilityLabel(block.line)
+    }
+
+    private var rectangle: some View {
         RoundedRectangle(cornerRadius: Board.radius)
             .fill(block.color)
             .overlay(alignment: .topLeading) {
@@ -232,6 +267,48 @@ struct BlockView: View {
             }
             .accessibilityElement()
             .accessibilityLabel(block.line)
+    }
+}
+
+/// A block's outline: a rounded rectangle, or a pebble for pebble blocks.
+struct BlockOutline: Shape {
+    let block: BoardBlock
+
+    func path(in rect: CGRect) -> Path {
+        guard let seed = block.pebbleSeed else {
+            return Path(roundedRect: rect, cornerRadius: Board.radius)
+        }
+        // Jittered points around an ellipse, smoothed with Catmull-Rom curves.
+        // Seeded, so each pebble keeps the same shape.
+        var rng = SeededRandom(seed: UInt64(seed + 7) &* 2_654_435_761)
+        let k = 9
+        let points: [CGPoint] = (0..<k).map { i in
+            let angle = Double(i) / Double(k) * 2 * .pi + Double.random(in: -0.15...0.15, using: &rng)
+            let r = CGFloat.random(in: 0.40...0.48, using: &rng)
+            return CGPoint(x: rect.minX + (0.5 + cos(angle) * r) * rect.width,
+                           y: rect.minY + (0.5 + sin(angle) * r) * rect.height)
+        }
+        var path = Path()
+        path.move(to: points[0])
+        for i in 0..<k {
+            let p0 = points[(i - 1 + k) % k], p1 = points[i]
+            let p2 = points[(i + 1) % k], p3 = points[(i + 2) % k]
+            path.addCurve(to: p2,
+                          control1: CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6),
+                          control2: CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6))
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Deterministic random numbers so each pebble keeps its shape across launches.
+struct SeededRandom: RandomNumberGenerator {
+    var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+        return state
     }
 }
 
