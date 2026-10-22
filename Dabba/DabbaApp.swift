@@ -1,11 +1,5 @@
-//
-//  DabbaApp.swift
-//  Dabba
-//
-//  Created by abhilash on 10/22/26.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct DabbaApp: App {
@@ -13,5 +7,9 @@ struct DabbaApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Session.self)
+        #if os(macOS)
+        .defaultSize(width: 760, height: 860)
+        #endif
     }
 }
