@@ -1,9 +1,11 @@
 import SwiftUI
 
-/// SPIKE (throwaway): a board of sample blocks to feel out drag-and-place.
-/// Not wired to sessions yet. Positions live in memory and reset on close.
+/// The home screen. SPIKE: a board of sample blocks to feel out drag-and-place.
+/// Not wired to sessions yet. Positions live in memory and reset on relaunch.
 struct BoardView: View {
-    @Environment(\.dismiss) private var dismiss
+    /// Opens the writing page.
+    let onWrite: () -> Void
+
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var blocks = BoardBlock.samples(columns: Board.columns)
@@ -17,7 +19,7 @@ struct BoardView: View {
                     .font(Paper.label)
                     .foregroundStyle(Paper.inkMuted)
                 Spacer()
-                Button("Done") { dismiss() }
+                Button("Write", action: onWrite)
                     .buttonStyle(.plain)
                     .font(Paper.label)
                     .foregroundStyle(Paper.ink)
@@ -30,10 +32,6 @@ struct BoardView: View {
         .padding(.top, Paper.margin)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paper.paper.ignoresSafeArea())
-        #if os(macOS)
-        .frame(minWidth: Board.width + 2 * Paper.margin,
-               minHeight: Board.height + 120)
-        #endif
     }
 
     private var board: some View {
@@ -131,12 +129,20 @@ struct BoardView: View {
 // MARK: - Geometry
 
 enum Board {
+    #if os(macOS)
+    // Bigger on the Mac: larger cells and a wide board to fill the window.
+    static let cell: CGFloat = 36
+    static let gap: CGFloat = 6
+    static let columns = 22
+    static let rows = 16
+    #else
     static let cell: CGFloat = 24
     static let gap: CGFloat = 4
-    static let pitch = cell + gap
-    static let radius: CGFloat = 3
     static let columns = 12
     static let rows = 20
+    #endif
+    static let pitch = cell + gap
+    static let radius: CGFloat = 3
     static let width = CGFloat(columns) * pitch - gap
     static let height = CGFloat(rows) * pitch - gap
 }
@@ -313,5 +319,5 @@ struct SeededRandom: RandomNumberGenerator {
 }
 
 #Preview {
-    BoardView()
+    BoardView(onWrite: {})
 }

@@ -1,7 +1,8 @@
 import SwiftUI
 import SwiftData
 
-/// Root of the app: always opens straight onto the live draft.
+/// Root of the app: opens on the board. Write opens the live draft; the
+/// corner button, or finishing a session, returns to the board.
 struct ContentView: View {
     @Environment(\.modelContext) private var context
 
@@ -9,42 +10,42 @@ struct ContentView: View {
            sort: \Session.createdAt, order: .reverse)
     private var drafts: [Session]
 
-    @State private var showingSessions = false
+    @State private var writing = false
 
     var body: some View {
         ZStack {
             Paper.paper.ignoresSafeArea()
 
-            if let draft = drafts.first {
+            if writing, let draft = drafts.first {
                 PageView(session: draft) { finish(draft) }
                     .id(draft.id)
+                    .overlay(alignment: .topTrailing) { boardButton }
+                    .transition(.opacity)
+            } else {
+                BoardView { withAnimation(.easeInOut(duration: 0.25)) { writing = true } }
                     .transition(.opacity)
             }
         }
-        .overlay(alignment: .topTrailing) {
-            Button {
-                showingSessions = true
-            } label: {
-                Image(systemName: "square.grid.2x2")
-                    .font(.system(size: 15))
-                    .foregroundStyle(Paper.inkMuted)
-                    .padding(16)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Sessions")
-        }
-        // SPIKE: the corner button opens the board instead of the sessions list.
-        #if os(iOS)
-        .fullScreenCover(isPresented: $showingSessions) { BoardView() }
-        #else
-        .sheet(isPresented: $showingSessions) { BoardView() }
-        #endif
         .tint(Paper.accent) // cursor and focus color
         .onAppear(perform: ensureDraft)
         .onChange(of: drafts.isEmpty) { _, isEmpty in
             if isEmpty { ensureDraft() }
         }
+    }
+
+    /// Back to the board from the page.
+    private var boardButton: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) { writing = false }
+        } label: {
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 15))
+                .foregroundStyle(Paper.inkMuted)
+                .padding(16)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Board")
     }
 
     private func ensureDraft() {
@@ -56,6 +57,7 @@ struct ContentView: View {
         // Placeholder transition; the fold-into-a-block animation replaces it.
         withAnimation(.easeInOut(duration: 0.35)) {
             session.finishedAt = .now
+            writing = false
         }
     }
 }
