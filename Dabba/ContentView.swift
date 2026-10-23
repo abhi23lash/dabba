@@ -11,6 +11,8 @@ struct ContentView: View {
     private var drafts: [Session]
 
     @State private var writing = false
+    /// Counts finished sessions; early ones get a faint "type /" hint.
+    @AppStorage("finishedSessions") private var finishedSessions = 0
 
     var body: some View {
         ZStack {
@@ -59,6 +61,7 @@ struct ContentView: View {
             session.finishedAt = .now
             writing = false
         }
+        finishedSessions += 1
     }
 }
 

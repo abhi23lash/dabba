@@ -20,6 +20,19 @@ final class Session {
     var tangents: [Tangent]? = []
     var landing: String = ""
 
+    // MARK: Modes
+
+    /// `ModeID` raw value. Open is today's page; Ideas walks through steps.
+    var modeID: String = ModeID.open.rawValue
+    @Relationship(deleteRule: .cascade, inverse: \Step.session)
+    var steps: [Step]? = []
+    /// `order` of the step being worked on.
+    var currentStepOrder: Int = 0
+
+    var mode: Mode { (ModeID(rawValue: modeID) ?? .open).mode }
+    var orderedSteps: [Step] { (steps ?? []).sorted { $0.order < $1.order } }
+    var currentStep: Step? { orderedSteps.first { $0.order == currentStepOrder } }
+
     init(createdAt: Date = .now) {
         self.createdAt = createdAt
     }

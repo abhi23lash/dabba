@@ -46,6 +46,22 @@ enum Paper {
         static let inkMuted = PlatformColor(light: 0x6E6E6E, dark: 0x9A9A9A)
         static let accent   = ink
         static let page     = PlatformFont.systemFont(ofSize: 18)
+
+        /// Each model's box on the page: a pale tint of a provisional block
+        /// color. Catch is the page itself, so it has none.
+        static func box(_ method: MethodID) -> PlatformColor? {
+            switch method {
+            case .catchAll:        return nil
+            case .firstPrinciples: return PlatformColor(light: 0xDCE9F2, dark: 0x202E37) // sky
+            case .inversion:       return PlatformColor(light: 0xF4D9CD, dark: 0x3B2922) // terracotta
+            case .secondOrder:     return PlatformColor(light: 0xDFEBD8, dark: 0x263124) // leaf
+            case .fiveWs:          return PlatformColor(light: 0xF7E7BF, dark: 0x3A3220) // turmeric
+            case .circleOfCompetence: return PlatformColor(light: 0xE6E1F0, dark: 0x2C2838) // lavender
+            case .twoTrack:        return PlatformColor(light: 0xEDE6DA, dark: 0x34302A) // sand
+            case .decisionTree:    return PlatformColor(light: 0xDCEEE8, dark: 0x1F322D) // mint
+            case .punchCard:       return PlatformColor(light: 0xF2DCE3, dark: 0x3A2630) // rose
+            }
+        }
     }
 }
 
