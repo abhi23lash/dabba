@@ -220,6 +220,8 @@ extension NSAttributedString.Key {
     static let stepMethod = NSAttributedString.Key("dabba.stepMethod")
     /// On the line break that closes a model's box.
     static let stepEnd = NSAttributedString.Key("dabba.stepEnd")
+    /// A chance tag ("30%") in a decision tree.
+    static let chance = NSAttributedString.Key("dabba.chance")
 }
 
 struct HeadingAnchor: Equatable {
@@ -370,6 +372,23 @@ enum ModelHeadings {
                 style.firstLineHeadIndent = boxInset
                 style.headIndent = boxInset
                 style.tailIndent = -boxInset
+                if section.method == .decisionTree, !isHeading {
+                    // Branches: each leading tab steps in one level, and
+                    // wrapped lines stay under their branch.
+                    let level = level(ofLineAt: paragraph.location, in: string)
+                    style.tabStops = (1...maxBranchLevel + 1).map {
+                        NSTextTab(textAlignment: .left, location: boxInset + CGFloat($0) * branchIndent)
+                    }
+                    style.defaultTabInterval = branchIndent
+                    style.headIndent = boxInset + CGFloat(level) * branchIndent
+                    // Options (the top level) read as the tree's nodes.
+                    let weight: PlatformFont.Weight = level == 0 ? .semibold : .regular
+                    let font = PlatformFont.systemFont(ofSize: 18, weight: weight)
+                    storage.enumerateAttribute(.font, in: paragraph) { value, run, _ in
+                        guard storage.attribute(.chance, at: run.location, effectiveRange: nil) == nil else { return }
+                        if (value as? PlatformFont) != font { storage.addAttribute(.font, value: font, range: run) }
+                    }
+                }
                 if !isHeading {
                     style.lineSpacing = Paper.pageLineSpacing
                     if let method = placeholders[paragraph.location] {
@@ -382,10 +401,53 @@ enum ModelHeadings {
                     storage.addAttribute(.paragraphStyle, value: style, range: paragraph)
                 }
             }
+            if section.method == .decisionTree { styleChances(in: section.range, storage: storage) }
         }
         storage.endEditing()
         #endif
     }
+
+    /// Chances in a tree ("30%", "~30%") become small muted tags. Earlier
+    /// tags are reset first, so editing a number updates its tag.
+    static func styleChances(in range: NSRange, storage: NSTextStorage) {
+        storage.enumerateAttribute(.chance, in: range) { value, run, _ in
+            guard value != nil else { return }
+            let struck = ((storage.attribute(.strikethroughStyle, at: run.location, effectiveRange: nil) as? Int) ?? 0) != 0
+            storage.addAttributes([.font: Paper.Platform.page,
+                                   .foregroundColor: struck ? Paper.Platform.inkMuted : Paper.Platform.ink],
+                                  range: run)
+            storage.removeAttribute(.chance, range: run)
+        }
+        for match in chancePattern.matches(in: storage.string, range: range) {
+            storage.addAttributes([.font: PlatformFont.systemFont(ofSize: 13, weight: .medium),
+                                   .foregroundColor: Paper.Platform.inkMuted,
+                                   .chance: true],
+                                  range: match.range)
+        }
+    }
+
+    // MARK: Decision tree
+
+    /// How far each branch level steps in.
+    static let branchIndent: CGFloat = 32
+    static let maxBranchLevel = 3
+
+    /// Branch level of a line: its leading tabs.
+    static func level(ofLineAt location: Int, in string: NSString) -> Int {
+        let line = string.lineRange(for: NSRange(location: min(location, string.length), length: 0))
+        var level = 0
+        while level < line.length, string.character(at: line.location + level) == 9 { level += 1 }  // "\t"
+        return level
+    }
+
+    /// True when `location` is inside a Decision tree box.
+    static func isInTree(_ location: Int, in text: NSAttributedString) -> Bool {
+        guard let id = step(at: location, in: text) else { return false }
+        return sections(in: text).first { $0.id == id }?.method == .decisionTree
+    }
+
+    /// A chance like "30%" or "~30%", shown as a small muted tag.
+    static let chancePattern = try! NSRegularExpression(pattern: "~?\\b\\d{1,3}\\s?%")
 
     /// Where a heading's writing starts: the line after it.
     static func contentStart(of range: NSRange) -> Int { NSMaxRange(range) + 1 }
@@ -865,7 +927,7 @@ struct PageTextView: NSViewRepresentable {
         /// While the command card is open, arrows and Return go to the card
         /// and Escape closes it.
         func textView(_ view: NSTextView, doCommandBy selector: Selector) -> Bool {
-            guard commandStart != nil else { return false }
+            guard commandStart != nil else { return treeKey(view, selector) }
             switch selector {
             case #selector(NSResponder.moveUp(_:)):
                 return parent.commands.key(.up)
@@ -882,6 +944,58 @@ struct PageTextView: NSViewRepresentable {
             default:
                 return false
             }
+        }
+
+        // MARK: Decision tree keys
+
+        /// In a Decision tree box, Return does the work: after an option it
+        /// starts a branch under it, after a branch another branch, and on an
+        /// empty branch it steps back out to the next option. Tab and Shift-Tab
+        /// still move a line in or out for deeper trees.
+        private func treeKey(_ view: NSTextView, _ selector: Selector) -> Bool {
+            guard let storage = view.textStorage,
+                  ModelHeadings.isInTree(view.selectedRange().location, in: storage) else { return false }
+            let string = storage.string as NSString
+            let caret = view.selectedRange().location
+            let line = string.lineRange(for: NSRange(location: caret, length: 0))
+            let level = ModelHeadings.level(ofLineAt: caret, in: string)
+            switch selector {
+            case #selector(NSResponder.insertTab(_:)):
+                guard level < ModelHeadings.maxBranchLevel else { return true }
+                shiftLine(view, start: line.location, by: 1)
+                return true
+            case #selector(NSResponder.insertBacktab(_:)):
+                if level > 0 { shiftLine(view, start: line.location, by: -1) }
+                return true
+            case #selector(NSResponder.insertNewline(_:)):
+                let content = string.substring(with: line).trimmingCharacters(in: .whitespacesAndNewlines)
+                if content.isEmpty && level > 0 {
+                    shiftLine(view, start: line.location, by: -1)
+                    return true
+                }
+                if content.isEmpty { return false }      // empty option: normal Return leaves the box
+                // After an option, the next line is a branch under it; after a
+                // branch, another branch at the same level.
+                let next = max(level, 1)
+                view.insertText("\n" + String(repeating: "\t", count: next),
+                                replacementRange: view.selectedRange())
+                return true
+            default:
+                return false
+            }
+        }
+
+        private func shiftLine(_ view: NSTextView, start: Int, by delta: Int) {
+            guard let storage = view.textStorage else { return }
+            let selection = view.selectedRange()
+            if delta > 0 {
+                storage.insert(NSAttributedString(string: "\t", attributes: Strike.baseAttributes), at: start)
+            } else {
+                storage.deleteCharacters(in: NSRange(location: start, length: 1))
+            }
+            view.setSelectedRange(NSRange(location: max(start, selection.location + delta),
+                                          length: selection.length))
+            sync(view)
         }
 
         private func updateCommand(_ view: NSTextView) {
@@ -1070,7 +1184,38 @@ final class PageNSTextView: NSTextView {
                              width: container.size.width, height: bottom - top)
             tint.setFill()
             NSBezierPath(roundedRect: box, xRadius: 8, yRadius: 8).fill()
+            if section.method == .decisionTree { drawBranches(in: section.range) }
         }
+    }
+
+    /// Thin lines joining each branch to the line it hangs from.
+    private func drawBranches(in range: NSRange) {
+        guard let storage = textStorage, let layout = layoutManager else { return }
+        let string = storage.string as NSString
+        var lines: [(level: Int, rect: NSRect)] = []
+        string.enumerateSubstrings(in: range, options: [.byLines, .substringNotRequired]) { _, line, _, _ in
+            guard line.location < storage.length,
+                  storage.attribute(.stepID, at: line.location, effectiveRange: nil) == nil else { return }
+            let glyph = layout.glyphIndexForCharacter(at: line.location)
+            let rect = layout.lineFragmentUsedRect(forGlyphAt: glyph, effectiveRange: nil)
+            lines.append((ModelHeadings.level(ofLineAt: line.location, in: string), rect))
+        }
+        let path = NSBezierPath()
+        path.lineWidth = 1
+        let origin = textContainerOrigin
+        let inset = ModelHeadings.boxInset, step = ModelHeadings.branchIndent
+        for (index, line) in lines.enumerated() where line.level > 0 {
+            guard let parent = lines[..<index].last(where: { $0.level == line.level - 1 }) else { continue }
+            let x = origin.x + inset + CGFloat(line.level - 1) * step + 6
+            let top = origin.y + parent.rect.maxY - Paper.pageLineSpacing
+            let mid = origin.y + line.rect.minY + (line.rect.height - Paper.pageLineSpacing) / 2
+            let textX = origin.x + inset + CGFloat(line.level) * step - 4
+            path.move(to: NSPoint(x: x, y: top))
+            path.line(to: NSPoint(x: x, y: mid))
+            path.line(to: NSPoint(x: textX, y: mid))
+        }
+        Paper.Platform.inkMuted.withAlphaComponent(0.6).setStroke()
+        path.stroke()
     }
 
     /// Grey text on the empty line under a model's heading, explaining the

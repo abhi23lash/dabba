@@ -58,7 +58,7 @@ struct Method {
                           explanation: "First the reasons you'd give someone else. Then what's really pulling you, the part you wouldn't say out loud."),
         .decisionTree: Method(id: .decisionTree, name: "Decision tree",
                               hint: "Branch each option into what could happen.",
-                              explanation: "Take each option, list what could happen if you chose it, and give each outcome a rough chance."),
+                              explanation: "Write an option and press Return, then list what could happen under it. Return on an empty line for the next option. Add a rough chance like 30%."),
         .punchCard: Method(id: .punchCard, name: "Punch card",
                            hint: "If you only got 20 of these, would this be one?",
                            explanation: "Imagine you get only 20 choices like this in your whole life. Would you spend one on this? Say why or why not."),
