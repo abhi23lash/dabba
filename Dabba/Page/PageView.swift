@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// The writing page: question at the top, free writing in the middle,
 /// the landing pinned at the bottom as the destination.
@@ -17,6 +18,9 @@ struct PageView: View {
     @State private var openTangent: UUID?
     /// Where each tangent's mark is drawn, from the top of the writing area.
     @State private var markPositions: [UUID: CGFloat] = [:]
+    /// Asks the text view to take a removed note's mark out of the writing.
+    @State private var tangentRemoval: TangentRemoval?
+    @State private var removalToken = 0
 
     /// Design decision: a session can only finish once it has landed.
     private var canFinish: Bool {
@@ -343,7 +347,8 @@ struct PageView: View {
             .overlay(alignment: .topTrailing) {
                 if !(session.tangents ?? []).isEmpty {
                     TangentColumn(tangents: session.tangents ?? [], marks: markPositions,
-                                  open: $openTangent, onClose: closeTangent)
+                                  open: $openTangent, onClose: closeTangent,
+                                  onRemove: removeTangent)
                         .offset(x: TangentColumn.width + Paper.margin)
                 }
             }
@@ -372,13 +377,26 @@ struct PageView: View {
                     }
                 }
             },
-            onScreen: { markPositions = $0 }
+            onScreen: { markPositions = $0 },
+            remove: tangentRemoval
         )
     }
 
     /// Back to the main text, exactly where you were.
     private func closeTangent() {
         openTangent = nil
+        textFocusRequest += 1
+    }
+
+    /// Removes a side note and its mark in the writing.
+    private func removeTangent(_ tangent: Tangent) {
+        if openTangent == tangent.id { openTangent = nil }
+        removalToken += 1
+        tangentRemoval = TangentRemoval(token: removalToken, id: tangent.id)
+        withAnimation(.easeOut(duration: 0.2)) {
+            session.tangents = (session.tangents ?? []).filter { $0.id != tangent.id }
+        }
+        tangent.modelContext?.delete(tangent)
         textFocusRequest += 1
     }
 }

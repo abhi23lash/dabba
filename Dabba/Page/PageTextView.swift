@@ -162,6 +162,27 @@ struct TangentHooks {
     var moved: ([UUID: Int]) -> Void = { _ in }
     /// Mark positions on screen (y, from the top of the writing area).
     var onScreen: ([UUID: CGFloat]) -> Void = { _ in }
+    /// Asks the text view to take a removed note's mark out of the writing.
+    var remove: TangentRemoval?
+}
+
+struct TangentRemoval: Equatable {
+    let token: Int
+    let id: UUID
+}
+
+extension TangentMarks {
+    /// Takes a tangent's mark out of the text. False if it wasn't there.
+    @discardableResult
+    static func removeMark(_ id: UUID, from storage: NSTextStorage) -> Bool {
+        var found: NSRange?
+        storage.enumerateAttribute(.tangentID, in: NSRange(location: 0, length: storage.length)) { value, range, stop in
+            if (value as? String) == id.uuidString { found = range; stop.pointee = true }
+        }
+        guard let range = found else { return false }
+        storage.deleteCharacters(in: range)
+        return true
+    }
 }
 
 // MARK: - Slash commands
@@ -572,6 +593,10 @@ struct PageTextView: UIViewRepresentable {
             context.coordinator.handledPrevious = models.previousRequest
             DispatchQueue.main.async { context.coordinator.jumpToPrevious(view) }
         }
+        if let removal = tangents.remove, removal.token != context.coordinator.handledRemoval {
+            context.coordinator.handledRemoval = removal.token
+            DispatchQueue.main.async { context.coordinator.removeMark(view, removal.id) }
+        }
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {
@@ -580,6 +605,7 @@ struct PageTextView: UIViewRepresentable {
         var handledConsume = 0
         var handledInsert = 0
         var handledPrevious = 0
+        var handledRemoval = 0
         private var lastCurrent: UUID??
         /// Where the `/` or `@` of an open command sits, and which list it opens.
         private var commandStart: Int?
@@ -666,6 +692,14 @@ struct PageTextView: UIViewRepresentable {
             parent.tangents.moved(TangentMarks.anchors(in: view.textStorage))
             parent.models.moved(ModelHeadings.anchors(in: view.textStorage), ModelHeadings.ends(in: view.textStorage))
             ModelHeadings.styleSections(view.textStorage)
+        }
+
+        func removeMark(_ view: UITextView, _ id: UUID) {
+            let caret = view.selectedRange
+            guard TangentMarks.removeMark(id, from: view.textStorage) else { return }
+            view.selectedRange = NSRange(location: min(caret.location, view.textStorage.length), length: 0)
+            view.undoManager?.removeAllActions()
+            sync(view)
         }
 
         // MARK: Models
@@ -812,6 +846,10 @@ struct PageTextView: NSViewRepresentable {
             context.coordinator.handledPrevious = models.previousRequest
             DispatchQueue.main.async { context.coordinator.jumpToPrevious(view) }
         }
+        if let removal = tangents.remove, removal.token != context.coordinator.handledRemoval {
+            context.coordinator.handledRemoval = removal.token
+            DispatchQueue.main.async { context.coordinator.removeMark(view, removal.id) }
+        }
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
@@ -820,6 +858,7 @@ struct PageTextView: NSViewRepresentable {
         var handledConsume = 0
         var handledInsert = 0
         var handledPrevious = 0
+        var handledRemoval = 0
         private var lastCurrent: UUID??
         /// Where the `/` or `@` of an open command sits, and which list it opens.
         private var commandStart: Int?
@@ -1064,6 +1103,15 @@ struct PageTextView: NSViewRepresentable {
             ModelHeadings.styleSections(storage, width: view.textContainer?.size.width ?? 0)
             view.needsDisplay = true   // boxes, and grey explanations under empty headings
             DispatchQueue.main.async { self.reportOnScreen() }
+        }
+
+        func removeMark(_ view: NSTextView, _ id: UUID) {
+            guard let storage = view.textStorage else { return }
+            let caret = view.selectedRange()
+            guard TangentMarks.removeMark(id, from: storage) else { return }
+            view.setSelectedRange(NSRange(location: min(caret.location, storage.length), length: 0))
+            view.undoManager?.removeAllActions()
+            sync(view)
         }
 
         // MARK: Models
