@@ -23,6 +23,9 @@ Scope agreed (2026-10-23):
 2. Inversion: one reason per line; any reason can flip into "For this to work…" under it (a control and a keystroke). Stacked in the box, not two columns.
 3. Second-order: a chain of lines, each with a muted "and then…".
 4. Moving through the mode (⌘↓/⌘↑, dots, hints) and the landing ("The idea is…", Finish) feel finished.
+5. Ending that pushes action (user's problem: ideas go unworked because they're too big and there are too many). After "The idea is…", Ideas asks "The smallest version is…" (something to try in a weekend or less) and "The first step is…" with today / this week / someday. Candidates, not yet confirmed: an open question line ("What I still don't know is…") and Dabba resurfacing the first step at the chosen time with Did it / Not yet / Let it go.
+
+Direction for these models (2026-10-23): make thinking easier, not add mechanics. Candidates under discussion: your own words carry forward (the First principles line quoted at the top of later models and by the landing), pause prompts (a few fixed questions per model that fade in only when you stop typing), and focus (earlier models fade back). Nothing generates text.
 
 Out for now: iPhone parity (next round), closing the loop (board, blocks, what shapes mean, side notes after finishing), other modes, shapes for the other models, typewriter scrolling.
 
@@ -134,7 +137,7 @@ All text pairs pass WCAG AA in both themes (checked).
 4. **Habit pairing (idea, not decided):** Dabba shows up at moments people would otherwise doomscroll, e.g. while a coding agent works. Claude Code hooks (or Shortcuts triggers) call links like `dabba://wait` / `dabba://done`; a small floating page appears and steps aside when the wait ends, without cutting off a sentence. The user is still thinking this through; don't build yet.
 5. **iPhone parity** for the page and Ideas
 6. **Use it daily for a few days,** fixing only what bothers the user
-7. **Close the loop:** finished sessions on the board (waits on the user deciding what shapes mean)
+7. **Close the loop:** finished sessions on the board (waits on the user deciding what shapes mean). Includes "one current idea": a single idea you're working on, new ideas wait on a short shelf and cool off for a few days before they can become current, and you pick the next one from the shelf. Unworked ideas may fade over time and ask once: keep or let go.
 8. **The fold:** the animation where a finished session folds into its block. Signature moment; spend real time on it.
 9. **Remaining modes, then learning mode**
 
