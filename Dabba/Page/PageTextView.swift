@@ -1206,11 +1206,16 @@ final class PageNSTextView: NSTextView {
               let container = textContainer else { return }
         for section in ModelHeadings.sections(in: storage) {
             guard let tint = Paper.Platform.box(section.method), section.range.length > 0 else { continue }
+            // Lay the whole box out before measuring it, so a line that just
+            // wrapped is counted and the text never spills past the box.
+            layout.ensureLayout(forCharacterRange: section.range)
             let first = layout.glyphIndexForCharacter(at: section.range.location)
             var top = layout.lineFragmentUsedRect(forGlyphAt: first, effectiveRange: nil).minY
             let lastChar = NSMaxRange(section.range) - 1
             let last = layout.glyphIndexForCharacter(at: lastChar)
             var bottom = layout.lineFragmentUsedRect(forGlyphAt: last, effectiveRange: nil).maxY
+            let glyphs = layout.glyphRange(forCharacterRange: section.range, actualCharacterRange: nil)
+            bottom = max(bottom, layout.boundingRect(forGlyphRange: glyphs, in: container).maxY)
             // A section that ends the page on an empty line includes that line.
             if !section.closed, NSMaxRange(section.range) == storage.length,
                (storage.string as NSString).character(at: lastChar) == 10 {

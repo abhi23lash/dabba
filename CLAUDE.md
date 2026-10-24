@@ -2,17 +2,23 @@
 
 A native iOS/iPadOS/macOS app for thinking on paper. You arrive cluttered, stuck or undecided, write freely, and leave with one clear line you wrote yourself. Working tagline: "Think on paper."
 
+## The goal
+
+Thinking is hard and a bit uncomfortable. Dabba makes it easier, so people keep writing and come to want to think better. That is the whole point and the moat; every feature is judged by whether it lowers that discomfort. The writing should feel enjoyable, never like homework.
+
 ## What you're doing right now
 
-The Xcode project was just created by hand in Xcode (Multiplatform → App, product name **Dabba**, SwiftUI, Storage: None, Swift Testing, git repo on). The first slice of code was drafted in another session but has **never been compiled**. Your job:
+**Finishing Ideas mode on the Mac** (branch `ideas-mode`), so there is one solid mode before anything else. Work one piece at a time; discuss and confirm scope with the user before building each.
 
-1. **Find the project.** It should be at `~/Developer/Dabba`, but it may have been saved somewhere else by mistake (Desktop, Documents, Downloads). If it isn't in `~/Developer`, quit Xcode, `mkdir -p ~/Developer`, move the whole `Dabba` folder there, and reopen `~/Developer/Dabba/Dabba.xcodeproj`. Confirm the move with the user first.
-2. **Drop in the starter files** from `starter/Dabba/` (shipped next to this file) into the app's source folder `~/Developer/Dabba/Dabba/`, overwriting the template's `ContentView.swift` and `DabbaApp.swift`. The source folder is a synchronized folder, so new files and subfolders join the target automatically. Do not hand-edit `project.pbxproj`.
-3. **Build and fix.** `xcodebuild -project Dabba.xcodeproj -scheme Dabba -destination 'platform=macOS' build`, then an iOS simulator destination. Expect a few compile errors; fix them without changing behaviour.
-4. **Run it** on the Mac and an iPhone simulator, and have the user try a session: write a question, write, fill the landing, finish with ⌘↩, open the sessions list.
-5. **Commit** once it builds and runs: "Writing page, sessions model and list".
+How it works now: `/` opens modes (`/ideas`, `/open`), `@` opens models (`@inversion`), ⌘K lists both. A model opens inline as a tinted box where it was called; its heading and the writing under it live in `Session.text`, anchored by `Step`. Return twice on an empty line steps out of a box.
 
-Then stop and check in with the user before starting the next build step.
+Scope agreed (2026-10-23):
+1. First principles: a plain box with its explanation; earlier attempts get crossed out with strike instead of delete, no special behaviour (user call: special handling was over-engineered).
+2. Inversion: one reason per line; any reason can flip into "For this to work…" under it (a control and a keystroke). Stacked in the box, not two columns.
+3. Second-order: a chain of lines, each with a muted "and then…".
+4. Moving through the mode (⌘↓/⌘↑, dots, hints) and the landing ("The idea is…", Finish) feel finished.
+
+Out for now: iPhone parity (next round), closing the loop (board, blocks, what shapes mean, side notes after finishing), other modes, shapes for the other models, typewriter scrolling.
 
 ## The user
 
@@ -24,7 +30,8 @@ An experienced developer who is new to the Mac and Xcode. Don't dumb anything do
 - **No AI in the app.** Nothing ever writes, completes, suggests or rewrites on the page. A later learning-mode feature may use an on-device decision model that judges but never writes; not now.
 - **The page belongs to the writer.** Private and local. SwiftData on device; iCloud sync later. No analytics on writing content.
 - **Guide, don't leave them alone.** Modes guide through the shape of the page and simple methods, not chatty prompts.
-- **Think first, write second.** Messy writing first, a short revision pass after.
+- **Writing is thinking.** You find out what you think by writing it. The page helps you keep writing; it never asks you to plan first.
+- **Never preachy.** No guilt, streaks, scores or lectures. Dabba invites; it never scolds or blocks.
 - **Not a notes app.** It's for thinking sessions, not storage.
 
 ## Stack
@@ -92,14 +99,16 @@ All text pairs pass WCAG AA in both themes (checked).
 
 ## Build order
 
-1. **The page** ← current
-2. **Sessions saved** ← included in the starter as a plain list
-3. **One mode** (Stuck or Deciding)
-4. **The fold:** the animation where a finished session folds into its block. Signature moment; spend real time on it.
-5. **The board:** grid, drag and place, colors and marks, zoom levels
-6. **Remaining modes, then learning mode**
+1. **The page** ← done (strike instead of delete, side notes, commands, inline model boxes)
+2. **One mode: Ideas** ← current, Mac first
+3. **Habit pairing (idea, not decided):** Dabba shows up at moments people would otherwise doomscroll, e.g. while a coding agent works. Claude Code hooks (or Shortcuts triggers) call links like `dabba://wait` / `dabba://done`; a small floating page appears and steps aside when the wait ends, without cutting off a sentence. The user is still thinking this through; don't build yet.
+4. **iPhone parity** for the page and Ideas
+5. **Use it daily for a few days,** fixing only what bothers the user
+6. **Close the loop:** finished sessions on the board (waits on the user deciding what shapes mean)
+7. **The fold:** the animation where a finished session folds into its block. Signature moment; spend real time on it.
+8. **Remaining modes, then learning mode**
 
-The user should use each step daily for a few days before the next.
+Finish each step before starting the next.
 
 ## Known gaps in the starter
 

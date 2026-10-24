@@ -40,7 +40,7 @@ struct Method {
                           explanation: "Get the whole idea down as it comes. Messy is fine. When a side idea shows up, park it with ⌘] instead of chasing it."),
         .firstPrinciples: Method(id: .firstPrinciples, name: "First principles",
                                  hint: "Underneath the details, what is this? One sentence.",
-                                 explanation: "Strip the idea down to what it is underneath the details, and say it in one plain sentence."),
+                                 explanation: "Say what this is underneath the details, in one plain sentence. Not right yet? Cross it out and try again below."),
         .inversion: Method(id: .inversion, name: "Inversion",
                            hint: "A year from now, this failed. Why?",
                            explanation: "Picture it a year from now, and it failed. Write down why, one reason per line."),
