@@ -8,7 +8,13 @@ Thinking is hard and a bit uncomfortable. Dabba makes it easier, so people keep 
 
 ## What you're doing right now
 
-**Finishing Ideas mode on the Mac** (branch `ideas-mode`), so there is one solid mode before anything else. Work one piece at a time; discuss and confirm scope with the user before building each.
+**Foundations first, then finishing Ideas mode on the Mac** (branch `ideas-mode`). Work one piece at a time; discuss and confirm scope with the user before building each.
+
+Foundations (agreed 2026-10-23, in order):
+1. Never lose text: save about a second after typing stops and when the app backgrounds or quits; check by force-quitting mid-sentence. Open in under a second with the cursor ready.
+2. Open straight onto the current page instead of the board; the board stays one click away and is never required.
+3. Keyboard first: every action has a shortcut and is in ⌘K (page/board ⌘B, side notes, leave mode, finish).
+4. Local files: mirror each session as Markdown (see "Local files"), plus File ▸ Export (⌘⇧E) on the Mac.
 
 How it works now: `/` opens modes (`/ideas`, `/open`), `@` opens models (`@inversion`), ⌘K lists both. A model opens inline as a tinted box where it was called; its heading and the writing under it live in `Session.text`, anchored by `Step`. Return twice on an empty line steps out of a box.
 
@@ -28,11 +34,34 @@ An experienced developer who is new to the Mac and Xcode. Don't dumb anything do
 
 - **Build only what's needed, and build it great.** Few features, each obsessed over. Don't add features, settings or screens that aren't in the current step.
 - **No AI in the app.** Nothing ever writes, completes, suggests or rewrites on the page. A later learning-mode feature may use an on-device decision model that judges but never writes; not now.
-- **The page belongs to the writer.** Private and local. SwiftData on device; iCloud sync later. No analytics on writing content.
+- **The page belongs to the writer.** Private and local: your writing lives on your device as files you can see and own. No analytics on writing content.
 - **Guide, don't leave them alone.** Modes guide through the shape of the page and simple methods, not chatty prompts.
 - **Writing is thinking.** You find out what you think by writing it. The page helps you keep writing; it never asks you to plan first.
 - **Never preachy.** No guilt, streaks, scores or lectures. Dabba invites; it never scolds or blocks.
 - **Not a notes app.** It's for thinking sessions, not storage.
+
+## Local files (decided 2026-10-23)
+
+Dabba keeps its SwiftData store, and also mirrors every session as a plain Markdown file in a folder the user can see (default `~/Documents/Dabba/`), updated as they write. One-way for now: edits made outside Dabba are not read back. The format is designed so files can later become the source of truth (an Obsidian-style vault, with iCloud Drive for sync):
+
+```
+---
+dabba: 1
+mode: ideas
+created: 2026-10-23T10:00:00Z
+finished: 2026-10-23T10:20:00Z
+landing: a writing app that makes thinking easier
+---
+# Should I build Dabba?
+
+Free writing, with ~~struck text~~ kept, and a side note mark.[^1]
+
+## Inversion
+Writing inside the model's box.
+<!-- /model -->
+
+[^1]: The side note's text.
+```
 
 ## Stack
 
@@ -100,13 +129,14 @@ All text pairs pass WCAG AA in both themes (checked).
 ## Build order
 
 1. **The page** ← done (strike instead of delete, side notes, commands, inline model boxes)
-2. **One mode: Ideas** ← current, Mac first
-3. **Habit pairing (idea, not decided):** Dabba shows up at moments people would otherwise doomscroll, e.g. while a coding agent works. Claude Code hooks (or Shortcuts triggers) call links like `dabba://wait` / `dabba://done`; a small floating page appears and steps aside when the wait ends, without cutting off a sentence. The user is still thinking this through; don't build yet.
-4. **iPhone parity** for the page and Ideas
-5. **Use it daily for a few days,** fixing only what bothers the user
-6. **Close the loop:** finished sessions on the board (waits on the user deciding what shapes mean)
-7. **The fold:** the animation where a finished session folds into its block. Signature moment; spend real time on it.
-8. **Remaining modes, then learning mode**
+2. **Foundations:** never lose text, open onto the page, keyboard first, local Markdown files ← current
+3. **One mode: Ideas,** Mac first
+4. **Habit pairing (idea, not decided):** Dabba shows up at moments people would otherwise doomscroll, e.g. while a coding agent works. Claude Code hooks (or Shortcuts triggers) call links like `dabba://wait` / `dabba://done`; a small floating page appears and steps aside when the wait ends, without cutting off a sentence. The user is still thinking this through; don't build yet.
+5. **iPhone parity** for the page and Ideas
+6. **Use it daily for a few days,** fixing only what bothers the user
+7. **Close the loop:** finished sessions on the board (waits on the user deciding what shapes mean)
+8. **The fold:** the animation where a finished session folds into its block. Signature moment; spend real time on it.
+9. **Remaining modes, then learning mode**
 
 Finish each step before starting the next.
 
@@ -118,4 +148,4 @@ Finish each step before starting the next.
 
 ## Later, not now
 
-On-device AI judging for learning mode via a decision model that only picks, never writes (prototype with TypeSafe's Jev, then a fine-tuned open-weight Laya on device). File uploads. Branching tangents and margins. Linking blocks, search. Boards as projects. iCloud sync.
+Custom modes (nice to have): make your own mode from models, ideally by saving a session you did as a mode rather than a builder screen. On-device AI judging for learning mode via a decision model that only picks, never writes (prototype with TypeSafe's Jev, then a fine-tuned open-weight Laya on device). File uploads. Branching tangents and margins. Linking blocks, search. Boards as projects. iCloud sync.

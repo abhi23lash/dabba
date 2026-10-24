@@ -5,6 +5,7 @@ import SwiftData
 /// corner button, or finishing a session, returns to the board.
 struct ContentView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.scenePhase) private var scenePhase
 
     @Query(filter: #Predicate<Session> { $0.finishedAt == nil },
            sort: \Session.createdAt, order: .reverse)
@@ -29,6 +30,15 @@ struct ContentView: View {
             }
         }
         .tint(Paper.accent) // cursor and focus color
+        // Save the moment Dabba goes to the background or quits.
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { try? context.save() }
+        }
+        #if os(macOS)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+            try? context.save()
+        }
+        #endif
         .onAppear(perform: ensureDraft)
         .onChange(of: drafts.isEmpty) { _, isEmpty in
             if isEmpty { ensureDraft() }

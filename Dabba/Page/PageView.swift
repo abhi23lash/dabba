@@ -10,6 +10,10 @@ struct PageView: View {
     @Bindable var session: Session
     let onFinish: () -> Void
 
+    @Environment(\.modelContext) private var context
+    /// Pending save, about a second after you stop typing.
+    @State private var saveTask: Task<Void, Never>?
+
     @FocusState private var focus: Field?
     private enum Field { case question, landing }
     /// Bumped to move focus into the writing area (a native text view).
@@ -101,6 +105,11 @@ struct PageView: View {
         .padding(.top, Paper.margin + 24) // clears the corner button
         .padding(.bottom, Paper.margin)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Never lose text: save shortly after any change to the session.
+        .onChange(of: session.text) { saveSoon() }
+        .onChange(of: session.question) { saveSoon() }
+        .onChange(of: session.landing) { saveSoon() }
+        .onChange(of: (session.tangents ?? []).map(\.text)) { saveSoon() }
         .task {
             if session.question.isEmpty { focus = .question } else { textFocusRequest += 1 }
         }
@@ -380,6 +389,17 @@ struct PageView: View {
             onScreen: { markPositions = $0 },
             remove: tangentRemoval
         )
+    }
+
+    /// Saves about a second after the last change, so a crash or force quit
+    /// loses at most a moment of typing.
+    private func saveSoon() {
+        saveTask?.cancel()
+        saveTask = Task {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            try? context.save()
+        }
     }
 
     /// Back to the main text, exactly where you were.
