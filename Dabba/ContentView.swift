@@ -1,8 +1,9 @@
 import SwiftUI
 import SwiftData
 
-/// Root of the app: opens on the board. Write opens the live draft; the
-/// corner button, or finishing a session, returns to the board.
+/// Root of the app: opens straight onto the live draft, cursor ready. The
+/// board is one click away (corner button) and never required; finishing a
+/// session gives you a fresh page.
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
@@ -11,7 +12,7 @@ struct ContentView: View {
            sort: \Session.createdAt, order: .reverse)
     private var drafts: [Session]
 
-    @State private var writing = false
+    @State private var writing = true
     /// Counts finished sessions; early ones get a faint "type /" hint.
     @AppStorage("finishedSessions") private var finishedSessions = 0
 
@@ -69,7 +70,6 @@ struct ContentView: View {
         // Placeholder transition; the fold-into-a-block animation replaces it.
         withAnimation(.easeInOut(duration: 0.35)) {
             session.finishedAt = .now
-            writing = false
         }
         finishedSessions += 1
     }
