@@ -8,7 +8,12 @@ import SwiftData
 /// CloudKit sync when it is added later.
 @Model
 final class Session {
+    /// Stable identity, written into the session's Markdown file header.
+    var id: UUID = UUID()
     var createdAt: Date = Date.now
+    /// The session's Markdown file name in the user's files folder, so a
+    /// renamed question renames the file instead of making a new one.
+    var fileName: String = ""
     var finishedAt: Date?
     var question: String = ""
     var text: String = ""

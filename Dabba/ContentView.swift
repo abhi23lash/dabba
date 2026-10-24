@@ -33,11 +33,16 @@ struct ContentView: View {
         .tint(Paper.accent) // cursor and focus color
         // Save the moment Dabba goes to the background or quits.
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { try? context.save() }
+            if phase != .active { saveNow() }
         }
         #if os(macOS)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
-            try? context.save()
+            saveNow()
+        }
+        .task {
+            // First launch with local files: ask once where to keep them.
+            try? await Task.sleep(for: .seconds(0.6))
+            FileMirror.askOnceIfNeeded()
         }
         #endif
         .onAppear(perform: ensureDraft)
@@ -61,6 +66,14 @@ struct ContentView: View {
         .accessibilityLabel("Board")
     }
 
+    /// Saves the database and the draft's Markdown copy.
+    private func saveNow() {
+        try? context.save()
+        #if os(macOS)
+        if let draft = drafts.first { FileMirror.write(draft) }
+        #endif
+    }
+
     private func ensureDraft() {
         guard drafts.isEmpty else { return }
         context.insert(Session())
@@ -71,6 +84,10 @@ struct ContentView: View {
         withAnimation(.easeInOut(duration: 0.35)) {
             session.finishedAt = .now
         }
+        try? context.save()
+        #if os(macOS)
+        FileMirror.write(session)   // its file records when it finished
+        #endif
         finishedSessions += 1
     }
 }

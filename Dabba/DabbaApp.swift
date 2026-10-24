@@ -11,6 +11,14 @@ struct DabbaApp: App {
         #if os(macOS)
         .defaultSize(width: 1100, height: 860)
         .commands {
+            CommandGroup(after: .newItem) {
+                Divider()
+                Button("Export…") {
+                    NotificationCenter.default.post(name: .exportSession, object: nil)
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                Button("Choose Files Folder…") { FileMirror.chooseFolder() }
+            }
             CommandMenu("Page") {
                 Button("Commands…") {
                     NotificationCenter.default.post(name: .showCommands, object: nil)

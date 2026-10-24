@@ -106,6 +106,11 @@ struct PageView: View {
         .padding(.bottom, Paper.margin)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // Never lose text: save shortly after any change to the session.
+        #if os(macOS)
+        .onReceive(NotificationCenter.default.publisher(for: .exportSession)) { _ in
+            FileMirror.export(session)
+        }
+        #endif
         .onChange(of: session.text) { saveSoon() }
         .onChange(of: session.question) { saveSoon() }
         .onChange(of: session.landing) { saveSoon() }
@@ -399,6 +404,9 @@ struct PageView: View {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             try? context.save()
+            #if os(macOS)
+            FileMirror.write(session)   // the readable Markdown copy
+            #endif
         }
     }
 
