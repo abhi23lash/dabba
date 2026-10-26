@@ -10,6 +10,8 @@ struct TangentColumn: View {
     @Binding var open: UUID?
     let onClose: () -> Void
     let onRemove: (Tangent) -> Void
+    /// Past sessions: notes can be read, not opened or removed.
+    var readOnly = false
 
     static let width: CGFloat = 220
     private let collapsed: CGFloat = 64
@@ -23,7 +25,8 @@ struct TangentColumn: View {
                             isOpen: open == item.tangent.id,
                             onOpen: { open = item.tangent.id },
                             onClose: onClose,
-                            onRemove: { onRemove(item.tangent) })
+                            onRemove: { onRemove(item.tangent) },
+                            readOnly: readOnly)
                     .frame(width: Self.width,
                            height: open == item.tangent.id ? expanded : collapsed,
                            alignment: .topLeading)
@@ -66,6 +69,7 @@ private struct TangentNote: View {
     let onOpen: () -> Void
     let onClose: () -> Void
     let onRemove: () -> Void
+    var readOnly = false
 
     @FocusState private var focused: Bool
     @State private var hovering = false
@@ -87,7 +91,7 @@ private struct TangentNote: View {
                         .font(Paper.label)
                         .foregroundStyle(Paper.inkMuted)
                         .keyboardShortcut("[", modifiers: .command)
-                } else if hovering {
+                } else if hovering && !readOnly {
                     // Hover a note to remove it.
                     Button(action: onRemove) {
                         Image(systemName: "xmark")
@@ -115,7 +119,7 @@ private struct TangentNote: View {
                 Text(tangent.text.isEmpty ? " " : tangent.text)
                     .font(.system(size: 13))
                     .foregroundStyle(Paper.ink)
-                    .lineLimit(2)
+                    .lineLimit(readOnly ? 3 : 2)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -123,7 +127,7 @@ private struct TangentNote: View {
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(Paper.note(tangent.number), in: RoundedRectangle(cornerRadius: 6))
         .contentShape(RoundedRectangle(cornerRadius: 6))
-        .onTapGesture { if !isOpen { onOpen() } }
+        .onTapGesture { if !isOpen && !readOnly { onOpen() } }
         .onHover { hovering = $0 }
         .onChange(of: isOpen, initial: true) { _, open in
             if open { DispatchQueue.main.async { focused = true } }

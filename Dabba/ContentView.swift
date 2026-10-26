@@ -2,17 +2,19 @@ import SwiftUI
 import SwiftData
 
 /// Root of the app: opens straight onto the live draft, cursor ready. The
-/// board is one click away (corner button) and never required; finishing a
-/// session gives you a fresh page.
+/// corner buttons open the board (the dabba) and the list of finished
+/// sessions; finishing a session gives you a fresh page.
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
 
+    /// Unfinished sessions, the current page first (the one opened most recently).
     @Query(filter: #Predicate<Session> { $0.finishedAt == nil },
-           sort: \Session.createdAt, order: .reverse)
+           sort: \Session.lastOpenedAt, order: .reverse)
     private var drafts: [Session]
 
-    @State private var writing = true
+    private enum Screen { case page, board, sessions }
+    @State private var screen: Screen = .page
     /// Counts finished sessions; early ones get a faint "type /" hint.
     @AppStorage("finishedSessions") private var finishedSessions = 0
 
@@ -20,13 +22,19 @@ struct ContentView: View {
         ZStack {
             Paper.paper.ignoresSafeArea()
 
-            if writing, let draft = drafts.first {
-                PageView(session: draft) { finish(draft) }
-                    .id(draft.id)
-                    .overlay(alignment: .topTrailing) { boardButton }
+            switch screen {
+            case .page:
+                if let draft = drafts.first {
+                    PageView(session: draft) { finish(draft) }
+                        .id(draft.id)
+                        .overlay(alignment: .topTrailing) { cornerButtons }
+                        .transition(.opacity)
+                }
+            case .board:
+                BoardView { show(.page) }
                     .transition(.opacity)
-            } else {
-                BoardView { withAnimation(.easeInOut(duration: 0.25)) { writing = true } }
+            case .sessions:
+                SessionsView { show(.page) }
                     .transition(.opacity)
             }
         }
@@ -45,25 +53,41 @@ struct ContentView: View {
             FileMirror.askOnceIfNeeded()
         }
         #endif
+        // The widget: "dabba://page" opens your page, "dabba://new" a fresh one.
+        .onOpenURL { url in
+            if url.host() == "new" { newPage() }
+            show(.page)
+        }
         .onAppear(perform: ensureDraft)
         .onChange(of: drafts.isEmpty) { _, isEmpty in
             if isEmpty { ensureDraft() }
         }
     }
 
-    /// Back to the board from the page.
-    private var boardButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.25)) { writing = false }
-        } label: {
-            Image(systemName: "square.grid.2x2")
+    /// From the page: your finished sessions, and the board.
+    private var cornerButtons: some View {
+        HStack(spacing: 0) {
+            cornerButton("list.bullet", label: "Sessions") { show(.sessions) }
+            cornerButton("square.grid.2x2", label: "Board") { show(.board) }
+        }
+    }
+
+    private func cornerButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
                 .font(.system(size: 15))
                 .foregroundStyle(Paper.inkMuted)
-                .padding(16)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 10)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Board")
+        .help(label)
+        .accessibilityLabel(label)
+    }
+
+    private func show(_ next: Screen) {
+        withAnimation(.easeInOut(duration: 0.25)) { screen = next }
     }
 
     /// Saves the database and the draft's Markdown copy.
@@ -72,6 +96,14 @@ struct ContentView: View {
         #if os(macOS)
         if let draft = drafts.first { FileMirror.write(draft) }
         #endif
+    }
+
+    /// A fresh page. If the current one has writing, it's kept as unfinished
+    /// (it shows at the top of Sessions); an empty page is just reused.
+    private func newPage() {
+        guard let current = drafts.first, current.hasWriting else { return }
+        saveNow()
+        context.insert(Session())
     }
 
     private func ensureDraft() {

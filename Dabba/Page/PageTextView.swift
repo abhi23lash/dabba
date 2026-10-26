@@ -553,6 +553,8 @@ struct PageTextView: UIViewRepresentable {
     var tangents = TangentHooks()
     var commands = CommandHooks()
     var models = ModelHooks()
+    /// Past sessions: shown exactly as written, but not editable.
+    var readOnly = false
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -560,6 +562,7 @@ struct PageTextView: UIViewRepresentable {
         let view = UITextView()
         view.delegate = context.coordinator
         view.backgroundColor = .clear
+        view.isEditable = !readOnly
         view.textContainerInset = .zero
         view.textContainer.lineFragmentPadding = 0
         view.tintColor = Paper.Platform.accent
@@ -765,6 +768,8 @@ struct PageTextView: NSViewRepresentable {
     var tangents = TangentHooks()
     var commands = CommandHooks()
     var models = ModelHooks()
+    /// Past sessions: shown exactly as written, but not editable.
+    var readOnly = false
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -801,6 +806,7 @@ struct PageTextView: NSViewRepresentable {
             coordinator.branch(view)
         }
         view.drawsBackground = false
+        view.isEditable = !readOnly
         view.isRichText = true
         view.allowsUndo = true
         view.importsGraphics = false

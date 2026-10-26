@@ -11,6 +11,9 @@ final class Session {
     /// Stable identity, written into the session's Markdown file header.
     var id: UUID = UUID()
     var createdAt: Date = Date.now
+    /// When this session was last the current page. The current page is the
+    /// unfinished session opened most recently.
+    var lastOpenedAt: Date = Date.now
     /// The session's Markdown file name in the user's files folder, so a
     /// renamed question renames the file instead of making a new one.
     var fileName: String = ""
@@ -43,4 +46,10 @@ final class Session {
     }
 
     var isFinished: Bool { finishedAt != nil }
+
+    /// Has anything been written yet? An empty page can simply be reused.
+    var hasWriting: Bool {
+        !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }

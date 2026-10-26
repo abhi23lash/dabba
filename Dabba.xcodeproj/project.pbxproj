@@ -6,6 +6,12 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EECEB0DD308FF3E200F510FC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECEB0DC308FF3E200F510FC /* WidgetKit.framework */; };
+		EECEB0DF308FF3E300F510FC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECEB0DE308FF3E200F510FC /* SwiftUI.framework */; };
+		EECEB0EA308FF3E300F510FC /* DabbaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EECEB0DA308FF3E200F510FC /* DabbaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		EE6AB684308AC39100DBC7EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,13 +27,45 @@
 			remoteGlobalIDString = EE6AB675308AC39000DBC7EE;
 			remoteInfo = Dabba;
 		};
+		EECEB0E8308FF3E300F510FC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EE6AB66E308AC39000DBC7EE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EECEB0D9308FF3E200F510FC;
+			remoteInfo = DabbaWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EECEB0EB308FF3E300F510FC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				EECEB0EA308FF3E300F510FC /* DabbaWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EE6AB676308AC39000DBC7EE /* Dabba.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dabba.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE6AB683308AC39100DBC7EE /* DabbaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DabbaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE6AB68D308AC39100DBC7EE /* DabbaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DabbaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EECEB0DA308FF3E200F510FC /* DabbaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DabbaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EECEB0DC308FF3E200F510FC /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
+		EECEB0DE308FF3E200F510FC /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EECEB0EE308FF3E300F510FC /* Exceptions for "DabbaWidget" folder in "DabbaWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EECEB0D9308FF3E200F510FC /* DabbaWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EE6AB678308AC39000DBC7EE /* Dabba */ = {
@@ -43,6 +81,14 @@
 		EE6AB690308AC39100DBC7EE /* DabbaUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DabbaUITests;
+			sourceTree = "<group>";
+		};
+		EECEB0E0308FF3E300F510FC /* DabbaWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EECEB0EE308FF3E300F510FC /* Exceptions for "DabbaWidget" folder in "DabbaWidgetExtension" target */,
+			);
+			path = DabbaWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -63,6 +109,13 @@
 			files = (
 			);
 		};
+		EECEB0D7308FF3E200F510FC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				EECEB0DF308FF3E300F510FC /* SwiftUI.framework in Frameworks */,
+				EECEB0DD308FF3E200F510FC /* WidgetKit.framework in Frameworks */,
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -72,6 +125,8 @@
 				EE6AB678308AC39000DBC7EE /* Dabba */,
 				EE6AB686308AC39100DBC7EE /* DabbaTests */,
 				EE6AB690308AC39100DBC7EE /* DabbaUITests */,
+				EECEB0E0308FF3E300F510FC /* DabbaWidget */,
+				EECEB0DB308FF3E200F510FC /* Frameworks */,
 				EE6AB677308AC39000DBC7EE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,8 +137,18 @@
 				EE6AB676308AC39000DBC7EE /* Dabba.app */,
 				EE6AB683308AC39100DBC7EE /* DabbaTests.xctest */,
 				EE6AB68D308AC39100DBC7EE /* DabbaUITests.xctest */,
+				EECEB0DA308FF3E200F510FC /* DabbaWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		EECEB0DB308FF3E200F510FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EECEB0DC308FF3E200F510FC /* WidgetKit.framework */,
+				EECEB0DE308FF3E200F510FC /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -96,8 +161,12 @@
 				EE6AB672308AC39000DBC7EE /* Sources */,
 				EE6AB673308AC39000DBC7EE /* Frameworks */,
 				EE6AB674308AC39000DBC7EE /* Resources */,
+				EECEB0EB308FF3E300F510FC /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				EECEB0E9308FF3E300F510FC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EE6AB678308AC39000DBC7EE /* Dabba */,
@@ -149,6 +218,24 @@
 			productReference = EE6AB68D308AC39100DBC7EE /* DabbaUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		EECEB0D9308FF3E200F510FC /* DabbaWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EECEB0EF308FF3E300F510FC /* Build configuration list for PBXNativeTarget "DabbaWidgetExtension" */;
+			buildPhases = (
+				EECEB0D6308FF3E200F510FC /* Sources */,
+				EECEB0D7308FF3E200F510FC /* Frameworks */,
+				EECEB0D8308FF3E200F510FC /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				EECEB0E0308FF3E300F510FC /* DabbaWidget */,
+			);
+			name = DabbaWidgetExtension;
+			productName = DabbaWidgetExtension;
+			productReference = EECEB0DA308FF3E200F510FC /* DabbaWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -170,6 +257,9 @@
 						CreatedOnToolsVersion = 27.1;
 						TestTargetID = EE6AB675308AC39000DBC7EE;
 					};
+					EECEB0D9308FF3E200F510FC = {
+						CreatedOnToolsVersion = 27.1;
+					};
 				};
 			};
 			buildConfigurationList = EE6AB671308AC39000DBC7EE /* Build configuration list for PBXProject "Dabba" */;
@@ -189,6 +279,7 @@
 				EE6AB675308AC39000DBC7EE /* Dabba */,
 				EE6AB682308AC39100DBC7EE /* DabbaTests */,
 				EE6AB68C308AC39100DBC7EE /* DabbaUITests */,
+				EECEB0D9308FF3E200F510FC /* DabbaWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -205,6 +296,11 @@
 			);
 		};
 		EE6AB68B308AC39100DBC7EE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		EECEB0D8308FF3E200F510FC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -227,6 +323,11 @@
 			files = (
 			);
 		};
+		EECEB0D6308FF3E200F510FC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -239,6 +340,11 @@
 			isa = PBXTargetDependency;
 			target = EE6AB675308AC39000DBC7EE /* Dabba */;
 			targetProxy = EE6AB68E308AC39100DBC7EE /* PBXContainerItemProxy */;
+		};
+		EECEB0E9308FF3E300F510FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EECEB0D9308FF3E200F510FC /* DabbaWidgetExtension */;
+			targetProxy = EECEB0E8308FF3E300F510FC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -559,6 +665,86 @@
 			};
 			name = Release;
 		};
+		EECEB0EC308FF3E300F510FC /* Debug configuration for PBXNativeTarget "DabbaWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DabbaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DabbaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.abhilash.Dabba.DabbaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		EECEB0ED308FF3E300F510FC /* Release configuration for PBXNativeTarget "DabbaWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DabbaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DabbaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.abhilash.Dabba.DabbaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -591,6 +777,14 @@
 			buildConfigurations = (
 				EE6AB69C308AC39100DBC7EE /* Debug configuration for PBXNativeTarget "DabbaUITests" */,
 				EE6AB69D308AC39100DBC7EE /* Release configuration for PBXNativeTarget "DabbaUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		EECEB0EF308FF3E300F510FC /* Build configuration list for PBXNativeTarget "DabbaWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EECEB0EC308FF3E300F510FC /* Debug configuration for PBXNativeTarget "DabbaWidgetExtension" */,
+				EECEB0ED308FF3E300F510FC /* Release configuration for PBXNativeTarget "DabbaWidgetExtension" */,
 			);
 			defaultConfigurationName = Release;
 		};
